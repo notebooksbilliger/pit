@@ -1,0 +1,11 @@
+test/**
+doc/**
+.vscode/**
+.github/**
+*.tgz
+NPM_TARBALL
+tsconfig.json
+*.ts
+!*.d.ts
+*.js.map
+module.d.ts

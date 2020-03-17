@@ -1,0 +1,174 @@
+Provides a way to get a **p**artial g**it** repository from an existing
+directory, apart from git submodules and other tools.
+
+Use case
+--------
+We wanted to share a curated set of c# code snippets and set up a c# solution
+in Visual Studio, including +Solution Items+, a +Test Project+, and of course
+the project containing the the files we wanted to share - along with all the
+Visual Studio project files we did *not* want to share to keep it as seamless as
+possible.
+
+Our idea was to provide fellow develpers (which includes ourselves) only with
+the 'public' part of our solution, i.e. they should be able to just *fetch files
+from somewhere* into their project directory of their c# projects and use the
+snippets *as needed* (include whatever they need into the project while leaving
+the rest unused). This also means the snippets shouldn't become an integral
+part of the project, but rather a bunch of files which are _ready_ to become a
+part of the project. +
+_Fetching from somewhere_ requires the files to be *hosted somewhere*. Ideally
+in a location _reachable from everywhere_ and not requiring any special client
+software. +
+The snippets are then supposed to be added to source control along with the
+projects they're used in, as if they were a native part of those projects. This
+retains compatibility with the project - if the snippets were updatedwith
+breaking changes without the 'state of use' being retained, the project could
+become unusable (e.g. no longer compilable) without the maintainer knowing
+about it, and each project would have to be 'monitored' through scheduled
+automated builds or the like, and if those builds fail, and the maintainer is
+informed, this would cause immediate zugzwang. However, as the code snippets are
+developed further, everyone should be able to update them in the respective 
+'client project' folders. This recommendation can be fulfilled by using
+something commonly known as *versioning*. +
+Furthermore, it was recommended to maintain the shared part as a *'fully
+fledged'* repository, including license, readme and version files.
+
+After researching several other opportunities like git partial clone, git
+submodules, package managersVisual Studio Shared Projects, even plain file
+sharing (SMB, NFS) as well as some commercial solutions), it seems none of them
+can fulfill all requirements (at least not without 'overdoing' things).
+
+* File shares (SMB, NFS) are likely to cause security and performance issues and
+have more or less complex client software, albeit available for almost all
+platforms.
+* git partial clone and submodules can handle only entire directories, but no
+'incomplete subsets' like we had.
+* We've also ivestigated Visual Studio Shared Projects, but these would be
+'entirely embedded' into projects.
+* Another approach would have been using package managers like NuGet or npm, but
+while being very advanced in semantic versioning, they have their specific
+folder hierarchies which aren't 'simple enough', require package management to
+use their versioning capabilities, and at least NuGet tends to entirely add the
+package contents into c# projects. Using both of them at the same time in a
+single project also isn't what's keeping things simple.
+
+Finally, we started *pit*.
+
+How pit works
+-------------
+As mentioned above, *pit* stands for **p**artial g**it** - yes, we're using git
+for this, albeit it could also be done with different version control systems,
+but git is currently the only supported _downstream target_ (see <<Downstream>>
+below). +
+
+Getting the files
+~~~~~~~~~~~~~~~~~
+The public part of a project is downstreamed to a git repository, which can then
+simply be cloned to a local folder inside an (e.g. c#) project. +
+If that 'consuming' project is version controlled using git itself, git would
+recognize the cloned repo and treat it as a submodule - which we don't want. So
+we use a non-standard repository folder named `.pit` (instead of `.git`) and
+precautionary place a `.gitignore` file that excludes `.pit/*`.
+[NOTE]
+If the consuming project is using a different versioncontrol, the `.pit` folder
+and it's contents should be excluded accordingly.
+
+Defining what to include
+~~~~~~~~~~~~~~~~~~~~~~~~
+Like you define what to include in a git repository, we maintain an ignore file
+`.pitignore` having the same syntax as `.gitignore` files. In `.pitignore`,
+everything that should not be shared can be excluded (e.g. in a c# project we'd
+exclude the project file `.csproj` and the `obj` and `bin` folders).
+[NOTE]
+We're using the non-standard file name because otherwise, if the parent project
+is version controlled with git, git wouldn't add these files without further
+actions.
+
+Providing information
+~~~~~~~~~~~~~~~~~~~~~
+To properly downstream a project, some additional information is required, e.g.
+the branch to use in he downstream target, version and copyright information. +
+[NOTE]
+In our case, we take most information from the .NET assembly manifest and store
+it in a JSON file, which can be easily consumed in all platforms.
+
+Downstream
+~~~~~~~~~~
+If you have a project folder structure like this:
+
+`.git/ ...` +
+`README` +
+`LICENSE` +
+`folder1/file1` +
+`folder1/file2` +
+`[red]#folder2/file1#` +
+`[red]#folder2/folder21/file1#` +
+`folder2/folder21/file2` +
+`[red]#folder2/folder22/file1#` +
+`[red]#folder2/folder22/file2#` +
+`[red]#folder2/folder22/file3#` +
+`[red]#folder2/folder22/file4#` +
+`folder2/folder23/file1` +
+`folder2/folder23/file2` +
+`[red]#folder2/folder23/file3#` +
+`folder3/file1` +
+`folder3/file2` +
+`folder3/file3` +
+
+and you want only  those files marked in [red]#red# (which is an 'incomplete
+subset' of `folder2/`) to be available publically, you need to _downstream_
+those files to a different folder.
+
+The downstream folder would then look like this:
+
+`file1` +
+`folder21/file1` +
+`folder22/file1` +
+`folder22/file2` +
+`folder22/file3` +
+`folder22/file4` +
+`folder23/file3` +
+
+.The `Downstream()` function of this package can do this (and more) for you
+
+`Downstream()` takes three parameters:
+
+* The upstream folder (which is the downstream source)
+* The downstream folder (which is the downstream target)
+* A `BuildInfo` object, which contains (amongst others)
+** A version information
+** A copyright information
+** A branch name
+
+`Downstream()` will perform the following steps:
+
+* Copy the downstream folder to a temporary working folder.
+** Open the git repository in that temporary working folder.
+** Force a checkout on the branch.
+** Resolve `detached HEAD` situations.
+** Find the according remote branch and remote.
+*** Fetch the repository URL from the remote.
+* Read the downstream file `.pitignore`.
+* Merge the upstream folder to the working folder (i.e. copy and replace all
+files that are not excluded by `.pitignore`).
+* Create or update a `.gitignore` file in the downstream target.
+** Include `.pit/*` in the `.gitignore` file.
+* Create or update a `LICENSE` file in the downstream target.
+** Replace a placeholder for copyright information with the copyright
+information from the `BuildInfo` object.
+* Create or update a `VERSION` file in the downstream target.
+** Replace all content with the version information from the `BuildInfo` object.
+* Create or update a `README.md` file in the downstream target.
+** Replace a small set of placeholders with according information from the
+`BuildInfo` object.
+* Retrieve signatures from
+** The `BuildInfo` object
+** The local git configuration
+** The repository git configuration
+* Open the repository index.
+** Add all changes to the index (stage).
+** Commit all changes on the index, using
+*** The signatures gathered before
+*** The commit messages from the `BuildInfo` object
+** `push` to the remote
+* Delete the working folder

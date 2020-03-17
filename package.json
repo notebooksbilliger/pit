@@ -1,0 +1,43 @@
+{
+    "name": "@nbb.com/pit",
+    "version": "0.9.1",
+    "description": "Partial git synchronization functions.",
+    "main": "index.js",
+    "scripts": {
+        "pretest": "tsc",
+        "test": "node ./node_modules/mocha/bin/_mocha --timeout 999999 --colors ./test/_suite.js",
+        "postinstall": "node -e \"require('@nbb.com/npmbuildtools/lib/check-global-deps').CheckGlobalDeps(['typescript'])\"",
+        "prepare": "tsc",
+        "postpack": "node -e \"require('@nbb.com/npmbuildtools').PostPack([ [ './node_modules/@nbb.com/npmbuildtools/lib/clean-package-elements', 'scripts.postpack', 'scripts.test', 'scripts.pretest', 'scripts.postinstall', 'directories.test' ], [ './node_modules/@nbb.com/npmbuildtools/lib/create-fallback-readme' ] ], { logLevel: 'verbose' })\""
+    },
+    "keywords": [
+        "typescript",
+        "git"
+    ],
+    "author": "Thorben Wolkersdorfer <thorbenw@nbb.com> (https://www.notebooksbilliger.de/)",
+    "license": "MIT",
+    "repository": "github:notebooksbilliger/pit",
+    "readme": "README.adoc",
+    "engines": {
+        "node": ">=8.17.0"
+    },
+    "directories": {
+        "doc": "./doc",
+        "test": "./test"
+    },
+    "dependencies": {
+        "@nbb.com/npmbuildtools": "^2.2.4",
+        "@nbb.com/ts-json-loader": "^1.0.4",
+        "fs-extra": "^8.1.0",
+        "glob-gitignore": "^1.0.14",
+        "ignore": "^5.1.4",
+        "nodegit": "^0.26.4"
+    },
+    "devDependencies": {
+        "@types/fs-extra": "^8.1.0",
+        "@types/mocha": "^7.0.1",
+        "@types/node": "^13.9.1",
+        "@types/nodegit": "^0.26.1",
+        "mocha": "^7.1.0"
+    }
+}

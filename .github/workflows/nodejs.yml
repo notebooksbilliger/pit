@@ -1,0 +1,31 @@
+name: Node.js CI
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        node-version: [8.x, 10.x, 12.x]
+        os: [windows-latest, ubuntu-latest]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Get full git commit history
+      run: git fetch --unshallow
+    - run: npm install
+    - run: npm pack
+    - run: node -e "require('./test/_prep.js').Prepare()"
+    - run: npm test
+      env:
+        CI: true
+        ACTIONS_STEP_DEBUG: ${{ secrets.ACTIONS_STEP_DEBUG }}
