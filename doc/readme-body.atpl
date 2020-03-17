@@ -96,38 +96,38 @@ Downstream
 ~~~~~~~~~~
 If you have a project folder structure like this:
 
-`.git/ ...` +
-`README` +
-`LICENSE` +
-`folder1/file1` +
-`folder1/file2` +
-`[red]#folder2/file1#` +
-`[red]#folder2/folder21/file1#` +
-`folder2/folder21/file2` +
-`[red]#folder2/folder22/file1#` +
-`[red]#folder2/folder22/file2#` +
-`[red]#folder2/folder22/file3#` +
-`[red]#folder2/folder22/file4#` +
-`folder2/folder23/file1` +
-`folder2/folder23/file2` +
-`[red]#folder2/folder23/file3#` +
-`folder3/file1` +
-`folder3/file2` +
-`folder3/file3` +
++.git/ ...+ +
++README+ +
++LICENSE+ +
++folder1/file1+ +
++folder1/file2+ +
++*folder2/file1*+ +
++*folder2/folder21/file1*+ +
++folder2/folder21/file2+ +
++*folder2/folder22/file1*+ +
++*folder2/folder22/file2*+ +
++*folder2/folder22/file3*+ +
++*folder2/folder22/file4*+ +
++folder2/folder23/file1+ +
++folder2/folder23/file2+ +
++*folder2/folder23/file3*+ +
++folder3/file1+ +
++folder3/file2+ +
++folder3/file3+ +
 
-and you want only  those files marked in [red]#red# (which is an 'incomplete
+and you want only  those files marked **bold** (which is an 'incomplete
 subset' of `folder2/`) to be available publically, you need to _downstream_
 those files to a different folder.
 
 The downstream folder would then look like this:
 
-`file1` +
-`folder21/file1` +
-`folder22/file1` +
-`folder22/file2` +
-`folder22/file3` +
-`folder22/file4` +
-`folder23/file3` +
++file1+ +
++folder21/file1+ +
++folder22/file1+ +
++folder22/file2+ +
++folder22/file3+ +
++folder22/file4+ +
++folder23/file3+ +
 
 .The `Downstream()` function of this package can do this (and more) for you
 
