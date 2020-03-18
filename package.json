@@ -26,8 +26,8 @@
         "test": "./test"
     },
     "dependencies": {
-        "@nbb.com/npmbuildtools": "^2.2.4",
-        "@nbb.com/ts-json-loader": "^1.0.4",
+        "@nbb.com/npmbuildtools": "^2.2.6",
+        "@nbb.com/ts-json-loader": "^1.0.5",
         "fs-extra": "^8.1.0",
         "glob-gitignore": "^1.0.14",
         "ignore": "^5.1.4",
@@ -36,8 +36,8 @@
     "devDependencies": {
         "@types/fs-extra": "^8.1.0",
         "@types/mocha": "^7.0.1",
-        "@types/node": "^13.9.1",
+        "@types/node": "^13.9.2",
         "@types/nodegit": "^0.26.1",
-        "mocha": "^7.1.0"
+        "mocha": "^7.1.1"
     }
 }
