@@ -38,6 +38,6 @@
         "@types/mocha": "^7.0.1",
         "@types/node": "^13.9.2",
         "@types/nodegit": "^0.26.1",
-        "mocha": "^7.1.1"
+        "mocha": "^10.2.0"
     }
 }
